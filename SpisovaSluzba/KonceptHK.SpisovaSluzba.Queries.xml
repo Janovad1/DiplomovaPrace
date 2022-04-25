@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<queries>
+  <query name="nothing">
+    <![CDATA[
+      empty
+      ]]>
+  </query>
+  <query name="GetTypXmlZpravyESSS">
+    <![CDATA[
+      select cislo_subjektu as id from lcs.xml_typ WITH(NOLOCK) where nazev_subjektu = ':typ_zpracovani'
+      ]]>
+  </query>
+  <query name="GetXmlByDoslePosty">
+    <![CDATA[
+      SELECT xmlV.text, xmlV.cislo_subjektu 
+      FROM lcs.xml_vyskyt xmlV with(nolock) 
+      where xmlV.cislo_subjektu in 
+      (SELECT cislo_vztaz_subjektu FROM lcs.vztahysubjektu with(nolock) where cislo_subjektu = :posta)
+      ]]>
+  </query>
+  <query name="GetOrganizaceByIC">
+    <![CDATA[
+      select cislo_subjektu from lcs.organizace with(NOLOCK) where ico = ':ico' and stav != 3 order by stav desc
+      ]]>
+  </query>
+  <query name="GetSmlouvuOdchoziPosty">
+    <![CDATA[
+      select sh.cislo_subjektu, p.cislo_tridy from lcs.subjekty sh with(NOLOCK)
+      join lcs.release_document rd with(NOLOCK) on rd.document = sh.cislo_subjektu
+      join lcs.odchozi_posta op with(NOLOCK) on op.zverejneni_dokumentu = rd.cislo_nonsubjektu
+	  join lcs.poradace p on sh.cislo_poradace = p.cislo_poradace
+      where op.cislo_subjektu = :subj
+      ]]>
+  </query>
+  <query name="GetReleaseIdRamcoveSmlouvy">
+    <![CDATA[
+      select top(1) release_id 
+      from lcs.release_document rd with(nolock) 
+      where rd.document = :subj and release_state = 3 
+      order by rd.release_datetime desc 
+      ]]>
+  </query>
+  <query name="getIsDebugMode">
+    <![CDATA[   
+  select hodnota from lcs.parametry_koncept with(nolock) where klic = 'debugMode'
+      ]]>
+  </query>
+  <query name="hasEFDDocs">
+    <![CDATA[   
+  select count(edm.cislo_subjektu) 
+  from lcs.vztahysubjektu vz with(nolock) 
+join lcs.edm_doc edm with(nolock) on vz.cislo_vztaz_subjektu = edm.cislo_subjektu
+where vz.cislo_vztahu = 1400908
+and vz.cislo_subjektu = :rec
+and edm.electronic_invoice_type is not null
+and edm.electronic_invoice_type != 0
+      ]]>
+  </query>
+  <query name="SpisSluzbaGetUtvarByReference">
+    <![CDATA[
+    select top 1 s.cislo_subjektu as cislo_subjektu
+    from lcs.subjekty s  WITH(NOLOCK) 
+    join lcs.vztahysubjektu v WITH(NOLOCK) on s.cislo_subjektu=v.cislo_subjektu 
+    join lcs.obdobi  o WITH(NOLOCK) on v.cislo_vztaz_subjektu=o.cislo_subjektu 
+    join lcs.kontext k WITH(NOLOCK) on o.obdobi=k.obdobi
+    join lcs.uda_utvar udaUtvar with(nolock) on s.cislo_subjektu = udaUtvar.cislo_subjektu
+    where s.cislo_poradace= :poradac and
+    getdate() between udaUtvar.PlatnostOd and ISNULL( udaUtvar.PlatnostDo, '20790606')
+    and s.reference_subjektu= ':reference'
+    and v.cislo_vztahu=10403
+    order by udaUtvar.PlatnostOd desc
+    ]]>
+  </query>
+  <query name="DohledejVecnouSkupinuDleFaktury">
+    <![CDATA[
+    select ISNULL(d.ess_vecna_skupina, 0) 
+    from lcs.dosla_posta d with(nolock) 
+join lcs.vztahysubjektu vz with(nolock) on d.cislo_subjektu = vz.cislo_vztaz_subjektu
+where cislo_vztahu = 1399 
+and vz.cislo_subjektu = :faktura
+    ]]>
+  </query>
+  <query name="DohledejSpisFakturyDleOP">
+    <![CDATA[
+    select o.spis from lcs.odchozi_posta o
+join lcs.vztahysubjektu vz on vz.cislo_vztaz_subjektu = o.cislo_subjektu
+join lcs.subjekty s on o.cislo_subjektu = s.cislo_subjektu
+where vz.cislo_vztahu = 2301043
+and vz.cislo_subjektu = :fd
+and s.nazev_subjektu = ':reference'
+    ]]>
+  </query>
+  <query name="DohledejDokumentyAS">
+    <![CDATA[
+select distinct a.cislo_subjektu,'EFD' typ,d.zkratka
+from lcs.odchozi_posta  p with(nolock)
+join lcs.vztahysubjektu v with(nolock) on p.cislo_subjektu=v.cislo_vztaz_subjektu 
+join lcs.faktura_dosla_hlavicka f with(nolock) on v.cislo_subjektu=f.cislo_subjektu
+join lcs.wf_activity_log_master l with(nolock) on f.cislo_subjektu=l.on_document
+join lcs.wf_action_menu_item    m with(nolock) on l.wf_action=m.cislo_subjektu
+join lcs.uda_wf_activity_def_hlavicka d with(nolock) on m.activity_definition=d.cislo_subjektu
+join lcs.vztahysubjektu x with(nolock) on f.cislo_subjektu=x.cislo_subjektu 
+join lcs.edm_doc a with(nolock) on x.cislo_vztaz_subjektu=a.cislo_subjektu and l.audit_log=a.cislo_subjektu
+where a.esss_zdroj_id   is null
+  and a.esss_hodnota_id is null
+  and a.esss_document_place=0
+  and p.cislo_subjektu = :posta
+  and v.cislo_vztahu=2301043
+  and x.cislo_vztahu=10544
+union
+select distinct a.cislo_subjektu,'SML' typ,d.zkratka
+from lcs.odchozi_posta  p with(nolock)
+join lcs.vztahysubjektu v with(nolock) on p.cislo_subjektu=v.cislo_vztaz_subjektu 
+join lcs.pozadavek_na_fin_plneni_hlavicka f with(nolock) on v.cislo_subjektu=f.cislo_subjektu
+join lcs.wf_activity_log_master l with(nolock) on f.cislo_subjektu=l.on_document
+join lcs.wf_action_menu_item    m with(nolock) on l.wf_action=m.cislo_subjektu
+join lcs.uda_wf_activity_def_hlavicka d with(nolock) on m.activity_definition=d.cislo_subjektu
+join lcs.vztahysubjektu x with(nolock) on f.cislo_subjektu=x.cislo_subjektu 
+join lcs.edm_doc a with(nolock) on x.cislo_vztaz_subjektu=a.cislo_subjektu and l.audit_log=a.cislo_subjektu
+where a.esss_zdroj_id   is null
+  and a.esss_hodnota_id is null
+  and a.esss_document_place=0
+  and p.cislo_subjektu = :posta
+  and v.cislo_vztahu=2301044
+  and x.cislo_vztahu=2301031
+    ]]>
+  </query>
+  <query name="DohledejZkratkuSchv">
+    <![CDATA[
+    select top 1 d.zkratka
+from lcs.odchozi_posta p  with(nolock)
+join lcs.vztahysubjektu v with(nolock) on p.cislo_subjektu=v.cislo_vztaz_subjektu 
+join lcs.faktura_dosla_hlavicka  f with(nolock) on v.cislo_subjektu=f.cislo_subjektu
+join lcs.wf_activity_log_master l with(nolock) on f.cislo_subjektu=l.on_document
+join lcs.wf_action_menu_item m with(nolock) on l.wf_action=m.cislo_subjektu
+join lcs.uda_wf_activity_def_hlavicka d with(nolock) on m.activity_definition=d.cislo_subjektu
+where p.cislo_subjektu = :posta 
+  and v.cislo_vztahu=2301043
+UNION
+select top 1 d.zkratka
+from lcs.odchozi_posta p   with(nolock)
+join lcs.vztahysubjektu v with(nolock) on p.cislo_subjektu=v.cislo_vztaz_subjektu 
+join lcs.pozadavek_na_fin_plneni_hlavicka f with(nolock) on v.cislo_subjektu=f.cislo_subjektu
+join lcs.wf_activity_log_master l with(nolock) on f.cislo_subjektu=l.on_document
+join lcs.wf_action_menu_item m with(nolock) on l.wf_action=m.cislo_subjektu
+join lcs.uda_wf_activity_def_hlavicka d with(nolock) on m.activity_definition=d.cislo_subjektu
+where p.cislo_subjektu = :posta 
+  and v.cislo_vztahu=2301044
+    ]]>
+  </query>
+  <query name="GetSpisSmlouvy">
+    <![CDATA[
+SELECT TOP 1 ISNULL(o.spis,d.spis)
+FROM lcs.vztahysubjektu x WITH(NOLOCK)
+LEFT OUTER JOIN lcs.odchozi_posta o WITH(NOLOCK) ON x.cislo_vztaz_subjektu=o.cislo_subjektu AND o.spis IS NOT NULL
+LEFT OUTER JOIN lcs.dosla_posta   d WITH(NOLOCK) ON x.cislo_vztaz_subjektu=d.cislo_subjektu AND d.spis IS NOT NULL
+WHERE x.cislo_vztahu IN(2301045,2301046)
+  AND x.cislo_subjektu IN(
+      SELECT v.cislo_subjektu  /*smlouva*/
+      FROM lcs.vztahysubjektu v WITH(NOLOCK)
+      WHERE v.cislo_vztahu=2301046
+        AND v.cislo_vztaz_subjektu = :odchPosta)
+ORDER BY ISNULL(o.spis,d.spis) DESC
+    ]]>
+  </query>
+  <query name="GetUzivateleZmenaZpracovatele">
+    <![CDATA[
+select distinct w.participant
+from lcs.wf_workitem_n_instance w  
+join lcs.subjekty              md on w.main_document=md.cislo_subjektu
+join lcs.vztahysubjektu         y on md.cislo_subjektu=y.cislo_subjektu
+where y.cislo_vztaz_subjektu= :posta
+  and y.cislo_vztahu in(1399,2301043,2301044)
+  and w.participant not in(
+    select x.cislo_vztaz_subjektu
+      from lcs.vztahysubjektu x
+      join lcs.spis           s on x.cislo_subjektu=s.cislo_nonsubjektu
+      join lcs.odchozi_posta  p on s.cislo_nonsubjektu=p.spis
+      where p.cislo_subjektu=y.cislo_vztaz_subjektu
+        and x.cislo_vztahu=112323)
+  and w.participant not in(
+      select x.cislo_vztaz_subjektu
+        from lcs.vztahysubjektu x
+        join lcs.spis           s on x.cislo_subjektu=s.cislo_nonsubjektu
+        join lcs.odchozi_posta  p on s.cislo_nonsubjektu=p.spis
+        where p.cislo_subjektu=:posta
+          and x.cislo_vztahu=112323)
+union
+/* pridavan jeste odb 112 a 113, kdyz na FD je zakazka s IsFinancedByOpdRs */
+select z.cislo_subjektu
+from lcs.zamestnanci z
+join lcs.subjekty   ut on z.utvar=ut.cislo_subjektu
+where left(ut.reference_subjektu,3) in('112','113')
+  and getdate() between z.datum_nastupu and z.datum_uk_prace
+  and exists(select 1 from lcs.vztahysubjektu         y
+                      join lcs.faktura_dosla_hlavicka f on y.cislo_subjektu=f.cislo_subjektu
+                      join lcs.uda_kon_zakazka        z on f.obchodni_pripad=z.cislo_subjektu
+                      where y.cislo_vztaz_subjektu=:posta
+                        and y.cislo_vztahu in(2301043)
+                        and z.isfinancedbyopdrs='A')
+  and z.cislo_subjektu not in(
+      select x.cislo_vztaz_subjektu
+        from lcs.vztahysubjektu x
+        join lcs.spis           s on x.cislo_subjektu=s.cislo_nonsubjektu
+        join lcs.odchozi_posta  p on s.cislo_nonsubjektu=p.spis
+        where p.cislo_subjektu=:posta
+          and x.cislo_vztahu=112323)
+    ]]>
+  </query>
+  <query name="DohledejSpisUzelFD">
+    <![CDATA[
+select top(1) vz2.cislo_vztaz_subjektu 
+from lcs.vztahysubjektu vz1 with(nolock)
+join lcs.vztahysubjektu vz2 with(nolock) on vz1.cislo_vztaz_subjektu = vz2.cislo_subjektu
+where vz1.cislo_vztahu = 1399
+and vz1.cislo_subjektu = :fd
+and vz2.cislo_vztahu = 106789
+    ]]>
+  </query>
+  <query name="GetSouvisejiciDokumenty">
+    <![CDATA[
+select distinct s.cislo_nonsubjektu
+from lcs.vztahysubjektu v with(nolock)
+join lcs.esss_souvisejici_dokument s with(nolock) on v.cislo_vztaz_subjektu=s.dokument
+where v.cislo_vztahu in(1399,2301043)
+  and s.typ=3 and s.esss_zdroj_id is not null and s.esss_hodnota_id is not null
+  and s.platny=1
+  and v.cislo_subjektu= :faktura
+    ]]>
+  </query>
+  <query name="GetNahliziteleKO">
+    <![CDATA[
+select distinct w.participant
+from lcs.vztahysubjektu v with(nolock)
+join lcs.esss_souvisejici_dokument s with(nolock) on v.cislo_vztaz_subjektu=s.dokument
+join lcs.wf_workitem_n_instance w with(nolock) on v.cislo_subjektu=w.main_document
+where v.cislo_vztahu in(1399,2301043)
+  and s.typ=3 and s.esss_zdroj_id is not null and s.esss_hodnota_id is not null
+  and s.platny=1
+/*and w.participant<>s.vlastnik_dokumentu */
+  and not exists(select 1 from lcs.vztahysubjektu with(nolock) where cislo_vztahu=112422 and cislo_subjektu=s.cislo_nonsubjektu and cislo_vztaz_subjektu=w.participant)
+  and v.cislo_subjektu= :faktura
+union
+select distinct z.cislo_subjektu
+from lcs.faktura_dosla_hlavicka f with(nolock)
+join lcs.vztahysubjektu v with(nolock) on v.cislo_subjektu=f.cislo_subjektu
+join lcs.vztahysubjektu ve with(nolock) on ve.cislo_vztaz_subjektu=f.utvar
+join lcs.expozitura_vlastni e with(nolock) on ve.cislo_subjektu=e.cislo_subjektu
+join lcs.vztahysubjektu x with(nolock) on e.cislo_subjektu=x.cislo_subjektu
+join lcs.uda_utvar u with(nolock) on x.cislo_vztaz_subjektu=u.cislo_subjektu and getdate() between u.PlatnostOd and u.PlatnostDo
+join lcs.zamestnanci z with(nolock) on u.cislo_subjektu=z.utvar and getdate() between isnull(z.datum_nastupu,'19900101') and isnull(z.datum_uk_prace,'20691231')
+join lcs.uda_zamestnanci uz with(nolock) on z.cislo_subjektu=uz.cislo_subjektu
+join lcs.subjekty fu with(nolock) on uz.funkce_rsd=fu.cislo_subjektu and fu.reference_subjektu in('1180','1060','1040')
+join lcs.esss_souvisejici_dokument s with(nolock) on v.cislo_vztaz_subjektu=s.dokument
+where f.cislo_subjektu=:faktura
+  and v.cislo_vztahu in(1399,2301043)
+  and ve.cislo_vztahu=1395 
+  and x.cislo_vztahu=1395
+  and s.typ=3 and esss_zdroj_id is not null and esss_hodnota_id is not null
+  and s.platny=1
+/*and z.cislo_subjektu<>s.vlastnik_dokumentu */
+  and not exists(select 1 from lcs.vztahysubjektu with(nolock) where cislo_vztahu=112422 and cislo_subjektu=s.cislo_nonsubjektu and cislo_vztaz_subjektu=z.cislo_subjektu)
+union
+/* pridavan jeste usek 11, kdyz na FD je zakazka s IsFinancedByOpdRs */
+select z.cislo_subjektu 
+from lcs.zamestnanci z with(nolock) 
+join lcs.subjekty ut with(nolock) on z.utvar=ut.cislo_subjektu
+where left(ut.reference_subjektu,3) in('112','113')
+  and getdate() between z.datum_nastupu and z.datum_uk_prace
+  and exists(select 1 from lcs.faktura_dosla_hlavicka f with(nolock) 
+					  join lcs.uda_kon_zakazka z with(nolock) on f.obchodni_pripad=z.cislo_subjektu
+					  join lcs.vztahysubjektu v with(nolock) on v.cislo_vztahu in(1399,2301043) and v.cislo_subjektu=f.cislo_subjektu
+					  join lcs.esss_souvisejici_dokument s with(nolock) on v.cislo_vztaz_subjektu=s.dokument
+            where f.cislo_subjektu=:faktura
+					    and z.isfinancedbyopdrs='A'
+ 					    and not exists(select 1 from lcs.vztahysubjektu with(nolock) where cislo_vztahu=112422 and cislo_subjektu=s.cislo_nonsubjektu and cislo_vztaz_subjektu=z.cislo_subjektu))  
+    ]]>
+  </query>
+  <query name="GetDepartmentReferenceByUser">
+    <![CDATA[
+select distinct x.reference
+from lcs.utvar u 
+join lcs.subjekty s on s.cislo_subjektu=u.cislo_subjektu
+join lcs.zamestnanci z on z.utvar=u.cislo_subjektu
+join lcs.spisovy_uzel x on s.reference_subjektu=x.reference
+where z.cislo_subjektu=:user 
+  ]]>
+  </query>
+  <query name="GetDepartmentRecordByUser">
+    <![CDATA[
+select distinct x.cislo_nonsubjektu
+from lcs.utvar u 
+join lcs.subjekty s on s.cislo_subjektu=u.cislo_subjektu
+join lcs.zamestnanci z on z.utvar=u.cislo_subjektu
+join lcs.spisovy_uzel x on s.reference_subjektu=x.reference
+where z.cislo_subjektu=:user 
+  ]]>
+  </query>
+  <query name="GetSouvisejiciDocsFD">
+    <![CDATA[
+select 'DP' typ,p.cislo_subjektu posta,s.cislo_nonsubjektu
+from lcs.vztahysubjektu v with(nolock)
+join lcs.dosla_posta p with(nolock) on v.cislo_vztahu=1399 and v.cislo_vztaz_subjektu=p.cislo_subjektu
+join lcs.esss_souvisejici_dokument s with(nolock) on p.cislo_subjektu=s.dokument
+where s.platny=1 and v.cislo_subjektu=:fd
+union
+select 'OP' typ,p.cislo_subjektu posta,s.cislo_nonsubjektu
+from lcs.vztahysubjektu v with(nolock)
+join lcs.odchozi_posta p with(nolock) on v.cislo_vztahu=2301043 and v.cislo_vztaz_subjektu=p.cislo_subjektu
+join lcs.esss_souvisejici_dokument s with(nolock) on p.cislo_subjektu=s.dokument
+where s.platny=1 and v.cislo_subjektu=:fd
+  ]]>
+  </query>
+  <query name="GetOwnerOfDoc">
+    <![CDATA[
+SELECT DISTINCT ISNULL(vlastnik_dokumentu,created_by) from lcs.esss_souvisejici_dokument where cislo_nonsubjektu =:doc
+  ]]>
+  </query>
+  <query name="DohledejESSSDokumentyProOpravu">
+    <![CDATA[
+SELECT cislo_subjektu posta,spis 
+FROM lcs.odchozi_posta
+WHERE cislo_poradace=10008658
+  AND spis IS NOT NULL
+  AND cislo_jednaci IS NULL
+  AND nazev_subjektu LIKE 'Auditní stopa FD%'
+  AND cislo_subjektu in (:records)
+  ]]>
+  </query>
+	<query name="DohledejSpisPodleSkody">
+		<![CDATA[
+select p.spis
+from lcs.vztahysubjektu v
+join lcs.dosla_posta p on v.cislo_subjektu=p.cislo_subjektu
+where v.cislo_vztahu=2301077 
+  and v.cislo_vztaz_subjektu=:skoda
+  ]]>
+	</query>
+</queries>

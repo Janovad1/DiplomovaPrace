@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<template xmlns="http://tempuri.org/DataForm.Frm.xsd" TotalWidth="800" TotalHeight="454">
+  <tab>
+    <tab TableColumns="3" Height="50">
+      <column Name="poradac_nazpor" Label="Pořadač:" ReadOnly="False" ColSpan="2"/>
+      <column Name="pocet_spusteni" Label="Počet spuštění"  ReadOnly="True" Align="Right" Width="30"/>
+    </tab>
+
+    <tab TableColumns="5">
+      <column Name="Podatelna" Label="Podatelna:" Width="30"  ReadOnly="True" />
+      <column Name="IDSpisu" Label="ID Spisu:"  ReadOnly="True"/>
+      <column Name="SpisovaZnacka" Label="Spisová značka:"  ReadOnly="True" />
+      <column Name="CisloJednaci" Label="Číslo jednací:"  ReadOnly="True" />
+      <column Name="CarovyKod" Label="Čárový kód:"  ReadOnly="True" />
+    </tab>
+  </tab>
+
+  <tab>
+    <tab TableColumns="3">
+      <column Name="CisloFaktury" Label="Číslo faktury:" Width="90" />
+      <column Name="VSY" Label="VSY:" Width="90" />
+      <column Name="SSY" Label="SSY:" Width="90" />
+
+      <column Name="DatumPrijeti" Label="Datum přijetí:" InputType="date" Width="90" />
+      <column Name="DUZP" Label="DUZP:" InputType="date" Width="90" />
+      <column Name="DatumSplatnosti" Label="DatumSplatnosti:" InputType="date" Width="90" />
+    </tab>
+  </tab>
+
+  <tab>
+    <tab TableColumns="5">
+      <column Name="IC" Label="IČ:" />
+      <column Name="NazevDodavatele" Label="Název:"  ReadOnly="True"  ColSpan="3"/>
+      <column Name="btnNewIC" Label="Nové IČ" InputType="button" Width="60" />
+      <column Name="ICVytez" Label="IČ vytěžené:" InputType="string" />
+      <column Name="NazevDodavateleVytez" Label="Název vytěžený:"  ReadOnly="True"  ColSpan="4" InputType="string" />
+
+      <column Name="UcetDodavatele" Label="Bankovní účet:" />
+      <column Name="BankaDodavatele" Label="Banka:" />
+      <column Name="IBAN" Label="IBAN:" />
+      <column Name="BIC" Label="BIC" />
+      <column Name="btnNewBU" Label="Nový BÚ" InputType="button" Width="60" />
+
+      <column Name="UcetDodavateleVytez" Label="Účet vytěžený:" InputType="string" />
+      <column Name="BankaDodavateleVytez" Label="Banka vytěžená:" InputType="string" />
+      <column Name="IBANVytez" Label="IBAN vytěžený:" InputType="string" />
+      <column Name="BICVytez" Label="BIC vytěžené" ColSpan="2" InputType="string" />
+    </tab>
+  </tab>
+
+  <tab>
+    <tab TableColumns="3">
+      <column Name="Stavba_refer" Label="Stavba:" RelationParams="C(111),f(10533)" />
+      <column Name="Utvar_refer" Label="Útvar:" RelationParams="C(19),f(106)" />
+      <column Name="Smlouva_refer" Label="Smlouva:" RelationParams="C(651)" />
+    </tab>
+  </tab>
+
+  <tab>
+    <column Name="Zalohy" Label="Zálohy:" width="100%" height="100%" ReadOnly="True" />
+  </tab>
+
+</template>

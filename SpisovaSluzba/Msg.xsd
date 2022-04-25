@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema id="Msg" targetNamespace="http://tempuri.org/Msg.xsd" elementFormDefault="qualified" xmlns="http://tempuri.org/Msg.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:annotation>
+    <xs:documentation xml:lang="en">
+      Xml data schema for all message files.
+      Copyright 2002. All rights reserved.
+    </xs:documentation>
+  </xs:annotation>
+  <!-- main structure -->
+  <xs:element name="messages">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="mess" type="message" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <!-- complex types -->
+  <xs:complexType name="message">
+    <xs:sequence>
+      <xs:element name="text" type="msgtxt" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="Code" type="xs:string" />
+    <xs:attribute name="HelpID" type="xs:string" />
+    <xs:attribute name="Source" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="msgtxt">
+    <xs:attribute name="LangID" type="xs:string" />
+    <xs:attribute name="Value" type="xs:string" />
+    <xs:attribute name="Help" type="xs:string" />
+  </xs:complexType>
+</xs:schema>

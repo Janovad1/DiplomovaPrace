@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<data Type="External" xmlns="http://tempuri.org/DataForm.Data.xsd">
+  <select>
+    <column Name="spisovy_uzel" Type="System.Int32" />
+    <column Name="spisovy_uzel_refer" Type="System.String" />
+    <column Name="uzivatel" Type="System.Int32" />
+    <column Name="uzivatel_nazev" Type="System.String" />
+  </select>
+</data>

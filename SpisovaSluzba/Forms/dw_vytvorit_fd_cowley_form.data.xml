@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<data Type="External" xmlns="http://tempuri.org/DataForm.Data.xsd">
+  <select>
+    <column Name="poradac" Type="System.Int32" />
+    <column Name="poradac_nazpor" Type="System.String" />
+    <column Name="pocet_spusteni" Type="System.Int32" />
+
+    <column Name="Podatelna" Type="System.String" />
+    <column Name="IDSpisu" Type="System.String" />
+    <column Name="SpisovaZnacka" Type="System.String" />
+    <column Name="CisloJednaci" Type="System.String" />
+    <column Name="CarovyKod" Type="System.String" />
+
+    <column Name="CisloFaktury" Type="System.String" />
+    <column Name="VSY" Type="System.String" />
+    <column Name="SSY" Type="System.String" />
+
+    <column Name="DatumPrijeti" Type="System.DateTime" />
+    <column Name="DUZP" Type="System.DateTime" />
+    <column Name="DatumSplatnosti" Type="System.DateTime" />
+
+    <column Name="IC" Type="System.String"  />
+    <column Name="NazevDodavatele" Type="System.String" />
+    <column Name="ICVytez" Type="System.String"  />
+    <column Name="NazevDodavateleVytez" Type="System.String" />
+
+    <column Name="UcetDodavatele" Type="System.String" />
+    <column Name="BankaDodavatele" Type="System.String" />
+    <column Name="IBAN" Type="System.String" />
+    <column Name="BIC" Type="System.String" />
+
+    <column Name="UcetDodavateleVytez" Type="System.String" />
+    <column Name="BankaDodavateleVytez" Type="System.String" />
+    <column Name="IBANVytez" Type="System.String" />
+    <column Name="BICVytez" Type="System.String" />
+
+    <column Name="Stavba" Label="System.Int32" />
+    <column Name="Stavba_refer" Label="System.String" />
+    <column Name="Utvar" Type="System.Int32"/>
+    <column Name="Utvar_refer" Type="System.String" />
+    <column Name="Smlouva" Label="System.Int32" />
+    <column Name="Smlouva_refer" Label="System.String" />
+
+    <column Name="Zalohy" Label="System.String" />
+  </select>
+</data>

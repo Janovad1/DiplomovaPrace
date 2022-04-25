@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<template xmlns="http://tempuri.org/DataForm.Frm.xsd" TotalWidth="210" TotalHeight="100">
+    <tab TableColumns="1" Height="50">
+      <column Name="spisovy_uzel_refer" Label="Spisový uzel:" Relation="1" RelationParams="c(2112)" RegisterItemChange="True"/>
+      <column Name="uzivatel_nazev" Label="Uživatel - vlastník:" Relation="1" RelationParams="c(39)" RegisterItemChange="True"/>
+    </tab>
+</template>

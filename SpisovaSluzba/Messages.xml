@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<messages xmlns="http://tempuri.org/Msg.xsd">
+  <mess Code="SSnoRecordsError">
+    <text LangID="CZ" Value="Nejsou zadáné žádné záznamy."/>
+  </mess>
+</messages>
